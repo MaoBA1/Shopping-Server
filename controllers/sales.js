@@ -70,7 +70,15 @@ router.get('/top5UniqueSoldProducts', async(request, response) => {
 
 router.get('/5lastdaysSales', async(request, response) => {
     const sales = await Sale.find()
-    const salesFrom5lastDays = sales.filter(x => moment().diff(x.creatAdt,'days') <= 5);
+    const today = moment(Date.now());
+    let salesFrom5lastDays = [];
+    sales.forEach(x => {
+        let saleDate = moment(x.creatAdt); 
+        if (Math.abs(saleDate.diff(today,'days')) <= 4) {
+            salesFrom5lastDays.push(x);
+        }
+    })
+    
     let totalForEachDay = [];
     let itemId = 1;
     salesFrom5lastDays.forEach(sale => {
@@ -81,9 +89,7 @@ router.get('/5lastdaysSales', async(request, response) => {
             itemId++;
         } else {
             totalForEachDay[indexOfCurrentDay].total += sale.total;
-        }        
-        console.log(totalForEachDay);
-        
+        }
     })
 
     return response.status(200).json({
